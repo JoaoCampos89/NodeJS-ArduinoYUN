@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO Blinking</title>
+    <!-- socket client library -->
+    <script src="https://cdn.socket.io/socket.io-1.3.7.js"></script>
+    <!-- jquery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" integrity="sha512-dTfge/zgoMYpP7QbHy4gWMEGsbsdZeCXz7irItjcC3sPUFtf0kuFbDz/ixG7ArTxmDjLXDmezHubeNikyKGVyQ==" rel="stylesheet">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script crossorigin="anonymous" integrity="sha512-K1qjQ+NcF2TYO/eI3M6v8EiNYZfA95pQumfvcVrTHtwQVDG+aHRqLi/ETn2uB+1JqwYqVG3LIvdm9lj6imS/pQ==" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="jumbotron">
+        <form>
+          <h3>
+            Change the LED Blinking
+          </h3>
+          <input id="ledBlinking" max="5000" min="0" type="range">
+          <button class="btn btn-default" id="button">Blink half second</button>
+
+        </form>
+      </div>
+
+      <script>
+        var socket = io();
+        $(document).ready(function () {
+          // range change set the blink
+          $('#ledBlinking')
+            .change(function () {
+              socket.emit('Set Led', $('#ledBlinking').val());
+
+            });
+            // button click set the led to blink half second
+          $('#button').click(function () {
+
+            socket.emit('Set Led', 500);
+          });
+        });
+        // server emits change led and we setup the led to returned value
+        socket.on('changedLed',function(val){
+          $('#ledBlinking').val(val);
+
+        })
+
+
+      </script>
+
+    </html>
