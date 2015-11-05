@@ -7,12 +7,10 @@
  *  troubleshoouting - first require express and next the johnny-five
  *  troubleshoouting - edit usr/bin/node in yun with the following line:
  *  NODE_PATH=/usr/lib/node_modules /usr/bin/nodejs $@
- *  Allowing to node use all memory
+ *  Allowing node to use all memory
  *  cd arduino/wwww
  *
  */
-
-
  var express = require('express');
  var app = express();
  var http = require('http').Server(app);
@@ -20,15 +18,15 @@
  var five = require("johnny-five");
  var board = new five.Board({port:"/dev/ttyATH0"});
 
- // instatiate led
+ // instantiate led
  var led = {};
 
- // serve index
+ // serve index html file
  app.get('/', function (req, res) {
    res.sendFile(__dirname + '/index.html');
  });
 
-// set led with value change in slider and emit val
+// set led with value with change event in slider. Emit the val
  io.on('connection', function(socket){
    console.log('a user connected');
    socket.on('Set Led', function(val){
@@ -44,9 +42,7 @@
 
   /*
     initiate the server at port 3000
-
    */
-
    http.listen(3000, function(){
         console.log('listening on *:3000');
       });
