@@ -1,0 +1,143 @@
+<!doctype html>
+<html>
+  <head>
+    <title>ROBOT</title>
+    <!-- socket client library -->
+    <script src="https://cdn.socket.io/socket.io-1.3.7.js"></script>
+
+    <script src="static/virtualjoystick.js"></script>
+    <!-- jquery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" integrity="sha512-dTfge/zgoMYpP7QbHy4gWMEGsbsdZeCXz7irItjcC3sPUFtf0kuFbDz/ixG7ArTxmDjLXDmezHubeNikyKGVyQ==" rel="stylesheet">
+
+    <link href='static/robot.css' rel='stylesheet'>
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script crossorigin="anonymous" integrity="sha512-K1qjQ+NcF2TYO/eI3M6v8EiNYZfA95pQumfvcVrTHtwQVDG+aHRqLi/ETn2uB+1JqwYqVG3LIvdm9lj6imS/pQ==" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+    <meta content="width=device-width,initial-scale=1" name="viewport"/>
+
+    <meta charset="UTF-8">
+  </head>
+
+  <body>
+    <span id="result"></span>
+    <!-- joystick container -->
+    <div id="joystick"></div>
+
+    <div class="container">
+      <div class="row">
+        <div class="col-xs-6 weapon">
+          <button class="btn btn-default weapon" id="weapon" type="submit">
+            <h1 class="weapon">Weapon</h1>
+          </button>
+        </div>
+        <div class="col-xs-6">
+          <form>
+            <input id="gainY" max="5" min="-5" type="range">
+            <input id="gainX" max="5" min="-5" type="range">
+            <input id="pass" type="password">
+          </form>
+          <button class="btn btn-default btn-block" id="robotStop">Stop</button>
+        </div>
+
+      </div>
+
+    </div>
+
+    <script>
+      // object with joystick status
+      var statusJoystick = {};
+        // declaring virtual joystick pointing to the joystick container
+      var joystick = new VirtualJoystick({container: document.getElementById('joystick'), mouseSupport: true});
+      joystick.addEventListener('touchStart', function () {
+        console.log('down');
+      });
+      joystick.addEventListener('touchEnd', function () {
+        statusJoystick.deltaX = joystick.deltaX();
+        statusJoystick.deltaY = joystick.deltaY();
+        statusJoystick.down = joystick.down();
+
+
+        socket.emit('statusJoystick', joystick);
+      });
+    // on moouse up  sends joystick data to server via socket event
+      document.getElementById('joystick').addEventListener('mouseup', function () {
+        statusJoystick.deltaX = joystick.deltaXmouseUp;
+        statusJoystick.deltaY = joystick.deltaYmouseUp;
+        statusJoystick.down = joystick.downMouseUp;
+      socket.emit('statusJoystick', statusJoystick);
+
+      console.log('dx: ' + joystick.deltaXmouseUp + ' dy: ' + joystick.deltaYmouseUp + ' down '+ statusJoystick.down);
+      // set to default value
+      joystick.deltaXmouseUp = 0;
+      joystick.deltaYmouseUp = 0;
+      joystick.downMouseUp = false;
+
+      });
+
+
+
+        // display in the browser the current mouse value in div with id joystick
+      setInterval(function(){
+      //  statusJoystick = joystick;
+				var outputEl	= document.getElementById('result');
+        statusJoystick.deltaX = joystick.deltaX();
+        statusJoystick.deltaY = joystick.deltaY();
+        statusJoystick.down = joystick.down;
+
+				outputEl.innerHTML	= '<b>Result:</b> '
+					+ ' dx:'+joystick.deltaX()
+					+ ' dy:'+joystick.deltaY()
+					+ (joystick.right()	? ' right'	: '')
+					+ (joystick.up()	? ' up'		: '')
+					+ (joystick.left()	? ' left'	: '')
+					+ (joystick.down()	? ' down' 	: '')
+			}, 1/30 * 1000);
+
+
+
+
+      var socket = io();
+      $(document).ready(function () {
+        pass = $('#pass').val();
+        // on click weapon ativates weapon in the server via socket event and adds or remove class active, depending of weapon status
+        $('#weapon').click(function () {
+          var $self = $(this);
+          if ($self.hasClass('active')) {
+            $self.removeClass('active');
+            socket.emit('deactivateWeapon');
+          } else {
+            socket.emit('activateWeapon');
+            $self.addClass('active');
+          }
+
+        });
+        // on click stops robot via socket
+        $('#robotStop').click(function () {
+          socket.emit('stopAllMotors');
+        });
+
+        // calibrate gain of delta X  virtual joystick on server;
+        $('#gainX').change(function () {
+          var gain = {};
+          var $self = $(this);
+          gain.Y = parseInt($('#gainY').val());
+          gain.X = parseInt($self.val());
+          socket.emit('calibrateGain', gain);
+        });
+          // calibrate gain of delta Y  virtual joystick on server;
+        $('#gainY').change(function () {
+          var gain = {};
+          var $self = $(this);
+          gain.X = parseInt($('#gainX').val());
+          gain.Y = parseInt($self.val());
+          socket.emit('calibrateGain', gain);
+        });
+
+      });
+
+      });
+    </script>
+  </html>

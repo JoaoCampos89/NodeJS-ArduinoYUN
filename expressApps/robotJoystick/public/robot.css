@@ -1,0 +1,38 @@
+
+.wrapper{
+  height: 300px;
+}
+
+#joystick{
+  height: 600px;
+  width: auto;
+}
+
+.row > div {
+  border: 1px solid red;
+}
+.btn.btn-default.weapon {
+    height: 300px;
+    width: 300px;
+    border-radius: 150px;
+    background-color: red;
+    border: 20px solid black;
+}
+.btn.btn-default.weapon:hover {
+    border-color: #E65151;
+}
+h1.weapon{
+  color: white;
+
+}
+.row.padding{
+  padding: 50px;
+}
+
+.col-xs-5.stop{
+  min-height: 200px
+}
+
+.btn.btn-default.weapon.active{
+  background-color: green;
+}
